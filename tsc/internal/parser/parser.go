@@ -1172,7 +1172,7 @@ func (p *Parser) parseStatement() *ast.Statement {
 	case ast.KindAsyncKeyword, ast.KindInterfaceKeyword, ast.KindTypeKeyword, ast.KindModuleKeyword, ast.KindNamespaceKeyword,
 		ast.KindDeclareKeyword, ast.KindConstKeyword, ast.KindEnumKeyword, ast.KindExportKeyword, ast.KindImportKeyword,
 		ast.KindPrivateKeyword, ast.KindProtectedKeyword, ast.KindPublicKeyword, ast.KindAbstractKeyword, ast.KindAccessorKeyword,
-		ast.KindStaticKeyword, ast.KindReadonlyKeyword, ast.KindGlobalKeyword:
+		ast.KindStaticKeyword, ast.KindReadonlyKeyword, ast.KindGlobalKeyword, ast.KindNominalKeyword:
 		if p.isStartOfDeclaration() {
 			return p.parseDeclaration()
 		}
@@ -6199,7 +6199,7 @@ func (p *Parser) isStartOfStatement() bool {
 	case ast.KindConstKeyword, ast.KindExportKeyword:
 		return p.isStartOfDeclaration()
 	case ast.KindAsyncKeyword, ast.KindDeclareKeyword, ast.KindInterfaceKeyword, ast.KindModuleKeyword, ast.KindNamespaceKeyword,
-		ast.KindTypeKeyword, ast.KindGlobalKeyword, ast.KindDeferKeyword, ast.KindSourceKeyword:
+		ast.KindTypeKeyword, ast.KindGlobalKeyword, ast.KindDeferKeyword, ast.KindSourceKeyword, ast.KindNominalKeyword:
 		// When these don't start a declaration, they're an identifier in an expression statement
 		return true
 	case ast.KindAccessorKeyword, ast.KindPublicKeyword, ast.KindPrivateKeyword, ast.KindProtectedKeyword, ast.KindStaticKeyword,
@@ -6253,15 +6253,15 @@ func (p *Parser) scanStartOfDeclaration() bool {
 		case ast.KindModuleKeyword, ast.KindNamespaceKeyword:
 			return p.nextTokenIsIdentifierOrStringLiteralOnSameLine()
 		case ast.KindAbstractKeyword, ast.KindAccessorKeyword, ast.KindAsyncKeyword, ast.KindDeclareKeyword, ast.KindPrivateKeyword,
-			ast.KindProtectedKeyword, ast.KindPublicKeyword, ast.KindReadonlyKeyword:
+			ast.KindProtectedKeyword, ast.KindPublicKeyword, ast.KindReadonlyKeyword, ast.KindNominalKeyword:
 			previousToken := p.token
 			p.nextToken()
 			// ASI takes effect for this modifier.
 			if p.hasPrecedingLineBreak() {
 				return false
 			}
-			if previousToken == ast.KindDeclareKeyword && p.token == ast.KindTypeKeyword {
-				// If we see 'declare type', then commit to parsing a type alias. parseTypeAliasDeclaration will
+			if (previousToken == ast.KindDeclareKeyword || previousToken == ast.KindNominalKeyword) && p.token == ast.KindTypeKeyword {
+				// If we see 'declare type' or 'nominal type', then commit to parsing a type alias. parseTypeAliasDeclaration will
 				// report Line_break_not_permitted_here if needed.
 				return true
 			}

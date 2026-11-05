@@ -1,0 +1,217 @@
+//// [tests/cases/compiler/nominalTypesOperations.ts] ////
+
+=== nominalTypesOperations.ts ===
+nominal type UserId = string;
+>UserId : UserId
+
+nominal type Meters = number;
+>Meters : Meters
+
+nominal type Seconds = number;
+>Seconds : Seconds
+
+nominal type Point = [x: number, y: number];
+>Point : Point
+
+nominal type Customer = { name: string };
+>Customer : Customer
+>name : string
+
+interface Client { name: string }
+>name : string
+
+// Arithmetic
+declare const d: Meters, t: Seconds;
+>d : Meters
+>t : Seconds
+
+const sum: number = d + d;
+>sum : number
+>d + d : number
+>d : Meters
+>d : Meters
+
+const mixed: number = d + t;
+>mixed : number
+>d + t : number
+>d : Meters
+>t : Seconds
+
+let counter = 0 as Meters;
+>counter : Meters
+>0 as Meters : Meters
+>0 : 0
+
+counter++;
+>counter++ : number
+>counter : Meters
+
+counter--;
+>counter-- : number
+>counter : Meters
+
+counter += 1;
+>counter += 1 : number
+>counter : Meters
+>1 : 1
+
+counter *= 2;
+>counter *= 2 : number
+>counter : Meters
+>2 : 2
+
+counter += d;
+>counter += d : number
+>counter : Meters
+>d : Meters
+
+counter += t; // error
+>counter += t : number
+>counter : Meters
+>t : Seconds
+
+let label = "x" as UserId;
+>label : UserId
+>"x" as UserId : UserId
+>"x" : "x"
+
+label += "y"; // error, base is not number
+>label += "y" : string
+>label : UserId
+>"y" : "y"
+
+// Keys
+declare const u1: UserId;
+>u1 : UserId
+
+const users: Record<UserId, Customer> = {};
+>users : Record<UserId, Customer>
+>{} : {}
+
+users[u1];
+>users[u1] : Customer
+>users : Record<UserId, Customer>
+>u1 : UserId
+
+users["x"]; // error
+>users["x"] : any
+>users : Record<UserId, Customer>
+>"x" : "x"
+
+declare const byId: { [id: UserId]: number };
+>byId : { [id: UserId]: number; }
+>id : UserId
+
+byId[u1];
+>byId[u1] : number
+>byId : { [id: UserId]: number; }
+>u1 : UserId
+
+byId["x"]; // error
+>byId["x"] : any
+>byId : { [id: UserId]: number; }
+>"x" : "x"
+
+// Tuples
+declare const p: Point;
+>p : Point
+
+declare function plot(x: number, y: number): void;
+>plot : (x: number, y: number) => void
+>x : number
+>y : number
+
+plot(...p);
+>plot(...p) : void
+>plot : (x: number, y: number) => void
+>...p : number
+>p : Point
+
+const [px, py] = p;
+>px : number
+>py : number
+>p : Point
+
+p[0];
+>p[0] : number
+>p : Point
+>0 : 0
+
+p[2]; // error
+>p[2] : undefined
+>p : Point
+>2 : 2
+
+// Objects
+declare const client: Client;
+>client : Client
+
+const c0: Customer = { name: "x" }; // error
+>c0 : Customer
+>{ name: "x" } : { name: string; }
+>name : string
+>"x" : "x"
+
+const c1 = { name: "x" } as Customer;
+>c1 : Customer
+>{ name: "x" } as Customer : Customer
+>{ name: "x" } : { name: string; }
+>name : string
+>"x" : "x"
+
+const c2: Customer = client; // error
+>c2 : Customer
+>client : Client
+
+const c3: Client = c1;
+>c3 : Client
+>c1 : Customer
+
+c1.name;
+>c1.name : string
+>c1 : Customer
+>name : string
+
+type K = keyof Customer;
+>K : "name"
+
+const k: K = "name";
+>k : "name"
+>"name" : "name"
+
+// Mapped types
+type P = Partial<Customer>;
+>P : Partial<Customer>
+
+const pp: P = {};
+>pp : Partial<Customer>
+>{} : {}
+
+type PU = Partial<UserId>;
+>PU : UserId
+
+const pu1: PU = u1;
+>pu1 : UserId
+>u1 : UserId
+
+const pu2: PU = "plain"; // error
+>pu2 : UserId
+>"plain" : "plain"
+
+type DeepPartial<T> = { [K in keyof T]?: DeepPartial<T[K]> };
+>DeepPartial : DeepPartial<T>
+
+const dp1: DeepPartial<{ id: UserId }> = { id: u1 };
+>dp1 : DeepPartial<{ id: UserId; }>
+>id : UserId
+>{ id: u1 } : { id: UserId; }
+>id : UserId
+>u1 : UserId
+
+const dp2: DeepPartial<{ id: UserId }> = { id: "plain" }; // error
+>dp2 : DeepPartial<{ id: UserId; }>
+>id : UserId
+>{ id: "plain" } : { id: string; }
+>id : string
+>"plain" : "plain"
+

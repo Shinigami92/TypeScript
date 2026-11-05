@@ -1884,6 +1884,14 @@
         "category": "Error",
         "code": 1558
     },
+    "'nominal' modifier can only appear on a type alias declaration.": {
+        "category": "Error",
+        "code": 1559
+    },
+    "A 'nominal' type alias cannot have type parameters.": {
+        "category": "Error",
+        "code": 1560
+    },
 
     "The types of '{0}' are incompatible between these types.": {
         "category": "Error",
@@ -4049,6 +4057,14 @@
     "The inferred type of '{0}' cannot be named without a reference to '{2}' from '{1}'. This is likely not portable. A type annotation is necessary.": {
         "category": "Error",
         "code": 2883
+    },
+    "Nominal type '{0}' circularly references itself as its base type.": {
+        "category": "Error",
+        "code": 2884
+    },
+    "Nominal type '{0}' has no possible values because the base types of its parent types do not overlap.": {
+        "category": "Error",
+        "code": 2885
     },
 
     "Import declaration '{0}' is using private name '{1}'.": {

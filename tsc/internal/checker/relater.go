@@ -197,7 +197,7 @@ func (c *Checker) isTypeRelatedTo(source *Type, target *Type, relation *Relation
 			return related&RelationComparisonResultSucceeded != 0
 		}
 	}
-	if source.flags&TypeFlagsStructuredOrInstantiable != 0 || target.flags&TypeFlagsStructuredOrInstantiable != 0 {
+	if (source.flags|target.flags)&(TypeFlagsStructuredOrInstantiable|TypeFlagsNominal) != 0 {
 		return c.checkTypeRelatedTo(source, target, relation, nil /*errorNode*/)
 	}
 	return false
@@ -2666,6 +2666,10 @@ func (r *Relater) isRelatedToEx(originalSource *Type, originalTarget *Type, recu
 		if source.flags&TypeFlagsSingleton != 0 {
 			return TernaryTrue
 		}
+		if source.flags&TypeFlagsNominal != 0 {
+			// Distinct nominal types are never identical.
+			return TernaryFalse
+		}
 		r.traceUnionsOrIntersectionsTooLarge(source, target)
 		return r.recursiveTypeRelatedTo(source, target, false /*reportErrors*/, IntersectionStateNone, recursionFlags)
 	}
@@ -2698,6 +2702,43 @@ func (r *Relater) isRelatedToEx(originalSource *Type, originalTarget *Type, recu
 	if r.relation == r.c.comparableRelation && target.flags&TypeFlagsNever == 0 && r.c.isSimpleTypeRelatedTo(target, source, r.relation, nil) ||
 		r.c.isSimpleTypeRelatedTo(source, target, r.relation, core.IfElse(reportErrors, r.reportError, nil)) {
 		return TernaryTrue
+	}
+	if source.flags&TypeFlagsNominal != 0 && target.flags&TypeFlagsUnionOrIntersection == 0 {
+		// A nominal type is related to a (non-union, non-intersection) target if its base type is. This also
+		// covers nominal targets: the base chain of the source reaches the target only if the source was
+		// declared (transitively) on top of the target.
+		// Elaborating "Type 'string' is not assignable to type 'UserId'" for a nominal target adds no information.
+		reportBaseErrors := reportErrors && target.flags&TypeFlagsNominal == 0
+		if result := r.isRelatedToEx(r.c.getBaseTypeOfNominalType(source), target, RecursionFlagsSource, reportBaseErrors, nil /*headMessage*/, intersectionState); result != TernaryFalse {
+			return result
+		}
+		if reportErrors {
+			r.reportErrorResults(originalSource, originalTarget, source, target, headMessage)
+		}
+		return TernaryFalse
+	}
+	if source.flags&TypeFlagsNominal != 0 && target.flags&TypeFlagsUnion != 0 {
+		// The base type of a nominal type may only be related to the target union as a whole, e.g. the base
+		// `Port & (80 | 8080)` of `HttpPort` is related to `80 | 8080`, but neither to `80` nor to `8080`. Members
+		// of the union that are the nominal type itself or one of its ancestors are handled by the regular union check.
+		if result := r.isRelatedTo(r.c.getBaseTypeOfNominalType(source), target, RecursionFlagsSource, false /*reportErrors*/); result != TernaryFalse {
+			return result
+		}
+	}
+	if source.flags&TypeFlagsIntersection != 0 && !r.c.containsNominalType(target) && r.c.containsNominalType(source) {
+		// A value of type `A & B`, where A and/or B are nominal, also has the intersection of their base types.
+		// E.g. `HttpPort & WellKnownPort` (bases `80 | 8080` and `80 | 443`) is related to `80`.
+		if result := r.isRelatedTo(r.c.getStructuralBaseType(source), target, RecursionFlagsSource, false /*reportErrors*/); result != TernaryFalse {
+			return result
+		}
+	}
+	if target.flags&TypeFlagsNominal != 0 && source.flags&TypeFlagsUnionOrIntersection == 0 {
+		// Only the nominal type itself and nominal types declared on top of it are related to a nominal target.
+		// Those cases were handled above.
+		if reportErrors {
+			r.reportErrorResults(originalSource, originalTarget, source, target, headMessage)
+		}
+		return TernaryFalse
 	}
 	if source.flags&TypeFlagsStructuredOrInstantiable != 0 || target.flags&TypeFlagsStructuredOrInstantiable != 0 {
 		isPerformingExcessPropertyChecks := intersectionState&IntersectionStateTarget == 0 && isObjectLiteralType(source) && source.objectFlags&ObjectFlagsFreshLiteral != 0

@@ -1,0 +1,39 @@
+nominalTypesGrammar.ts(11,1): error TS1559: 'nominal' modifier can only appear on a type alias declaration.
+nominalTypesGrammar.ts(12,1): error TS1559: 'nominal' modifier can only appear on a type alias declaration.
+nominalTypesGrammar.ts(13,1): error TS1559: 'nominal' modifier can only appear on a type alias declaration.
+nominalTypesGrammar.ts(14,1): error TS1560: A 'nominal' type alias cannot have type parameters.
+nominalTypesGrammar.ts(15,9): error TS1030: 'nominal' modifier already seen.
+
+
+==== nominalTypesGrammar.ts (5 errors) ====
+    // 'nominal' is a contextual keyword
+    const nominal = 1;
+    nominal
+    type X = 1;
+    const y = nominal + 1;
+    
+    export nominal type Email = string;
+    declare nominal type Handle = number;
+    export declare nominal type Token = string;
+    
+    nominal interface I {} // error
+    ~~~~~~~
+!!! error TS1559: 'nominal' modifier can only appear on a type alias declaration.
+    nominal class C {} // error
+    ~~~~~~~
+!!! error TS1559: 'nominal' modifier can only appear on a type alias declaration.
+    nominal const z = 1; // error
+    ~~~~~~~
+!!! error TS1559: 'nominal' modifier can only appear on a type alias declaration.
+    nominal type G<T> = string; // error
+    ~~~~~~~
+!!! error TS1560: A 'nominal' type alias cannot have type parameters.
+    nominal nominal type Twice = string; // error
+            ~~~~~~~
+!!! error TS1030: 'nominal' modifier already seen.
+    
+    function f() {
+        nominal type Local = string;
+        return "x" as Local;
+    }
+    

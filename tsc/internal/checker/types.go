@@ -542,7 +542,7 @@ const (
 	TypeFlagsIntersection    TypeFlags = 1 << 28 // Intersection (T & U)
 	TypeFlagsReserved1       TypeFlags = 1 << 29 // Used by union/intersection type construction
 	TypeFlagsReserved2       TypeFlags = 1 << 30 // Used by union/intersection type construction
-	TypeFlagsReserved3       TypeFlags = 1 << 31
+	TypeFlagsNominal         TypeFlags = 1 << 31 // Nominal type alias
 
 	TypeFlagsAnyOrUnknown                  = TypeFlagsAny | TypeFlagsUnknown
 	TypeFlagsNullable                      = TypeFlagsUndefined | TypeFlagsNull
@@ -576,7 +576,7 @@ const (
 	TypeFlagsSingleton                     = TypeFlagsAny | TypeFlagsUnknown | TypeFlagsString | TypeFlagsNumber | TypeFlagsBoolean | TypeFlagsBigInt | TypeFlagsESSymbol | TypeFlagsVoid | TypeFlagsUndefined | TypeFlagsNull | TypeFlagsNever | TypeFlagsNonPrimitive
 	// 'TypeFlagsNarrowable' types are types where narrowing actually narrows.
 	// This *should* be every type other than null, undefined, void, and never
-	TypeFlagsNarrowable = TypeFlagsAny | TypeFlagsUnknown | TypeFlagsStructuredOrInstantiable | TypeFlagsStringLike | TypeFlagsNumberLike | TypeFlagsBigIntLike | TypeFlagsBooleanLike | TypeFlagsESSymbol | TypeFlagsUniqueESSymbol | TypeFlagsNonPrimitive
+	TypeFlagsNarrowable = TypeFlagsAny | TypeFlagsUnknown | TypeFlagsStructuredOrInstantiable | TypeFlagsNominal | TypeFlagsStringLike | TypeFlagsNumberLike | TypeFlagsBigIntLike | TypeFlagsBooleanLike | TypeFlagsESSymbol | TypeFlagsUniqueESSymbol | TypeFlagsNonPrimitive
 	// The following flags are aggregated during union and intersection type construction
 	TypeFlagsIncludesMask = TypeFlagsAny | TypeFlagsUnknown | TypeFlagsPrimitive | TypeFlagsNever | TypeFlagsObject | TypeFlagsUnion | TypeFlagsIntersection | TypeFlagsNonPrimitive | TypeFlagsTemplateLiteral | TypeFlagsStringMapping
 	// The following flags are used for different purposes during union and intersection type construction
@@ -623,6 +623,7 @@ var typeFlagNames = [...]struct {
 	{TypeFlagsConditional, "Conditional"},
 	{TypeFlagsUnion, "Union"},
 	{TypeFlagsIntersection, "Intersection"},
+	{TypeFlagsNominal, "Nominal"},
 }
 
 // FormatTypeFlags returns the individual flag names as a slice of strings.
@@ -764,6 +765,7 @@ const (
 	typeKindIntrinsic typeKind = iota + 1
 	typeKindLiteral
 	typeKindUniqueESSymbol
+	typeKindNominal
 	typeKindTypeParameter
 	typeKindIndex
 	typeKindIndexedAccess
@@ -798,6 +800,7 @@ var (
 	_ [0 - unsafe.Offsetof(IntrinsicType{}.Type)]byte
 	_ [0 - unsafe.Offsetof(LiteralType{}.Type)]byte
 	_ [0 - unsafe.Offsetof(UniqueESSymbolType{}.Type)]byte
+	_ [0 - unsafe.Offsetof(NominalType{}.Type)]byte
 	_ [0 - unsafe.Offsetof(TypeParameter{}.Type)]byte
 	_ [0 - unsafe.Offsetof(IndexType{}.Type)]byte
 	_ [0 - unsafe.Offsetof(IndexedAccessType{}.Type)]byte
@@ -845,7 +848,8 @@ func (t *Type) AsLiteralType() *LiteralType     { return castType[LiteralType](t
 func (t *Type) AsUniqueESSymbolType() *UniqueESSymbolType {
 	return castType[UniqueESSymbolType](t, typeKindUniqueESSymbol)
 }
-func (t *Type) AsTupleType() *TupleType { return castType[TupleType](t, typeKindTuple) }
+func (t *Type) AsNominalType() *NominalType { return castType[NominalType](t, typeKindNominal) }
+func (t *Type) AsTupleType() *TupleType     { return castType[TupleType](t, typeKindTuple) }
 func (t *Type) AsInstantiationExpressionType() *InstantiationExpressionType {
 	return castType[InstantiationExpressionType](t, typeKindInstantiationExpression)
 }
@@ -1107,6 +1111,14 @@ func (t *LiteralType) String() string {
 type UniqueESSymbolType struct {
 	TypeBase
 	name string
+}
+
+// NominalType is the declared type of a `nominal type X = Base` alias. Only the type itself and
+// nominal types whose base (transitively) is this type are assignable to it. The type is assignable
+// to its base type. The base type is resolved lazily to support self-referential declarations.
+type NominalType struct {
+	TypeBase
+	resolvedBaseType *Type
 }
 
 // ConstrainedType (type with computed base constraint)

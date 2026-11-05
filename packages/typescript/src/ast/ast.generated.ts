@@ -160,8 +160,9 @@ export type KeywordSyntaxKind =
     | SyntaxKind.OverrideKeyword
     | SyntaxKind.OfKeyword
     | SyntaxKind.DeferKeyword
+    | SyntaxKind.NominalKeyword
     | SyntaxKind.SourceKeyword;
-export type ModifierSyntaxKind = SyntaxKind.AbstractKeyword | SyntaxKind.AccessorKeyword | SyntaxKind.AsyncKeyword | SyntaxKind.ConstKeyword | SyntaxKind.DeclareKeyword | SyntaxKind.DefaultKeyword | SyntaxKind.ExportKeyword | SyntaxKind.InKeyword | SyntaxKind.PrivateKeyword | SyntaxKind.ProtectedKeyword | SyntaxKind.PublicKeyword | SyntaxKind.ReadonlyKeyword | SyntaxKind.OutKeyword | SyntaxKind.OverrideKeyword | SyntaxKind.StaticKeyword;
+export type ModifierSyntaxKind = SyntaxKind.AbstractKeyword | SyntaxKind.AccessorKeyword | SyntaxKind.AsyncKeyword | SyntaxKind.ConstKeyword | SyntaxKind.DeclareKeyword | SyntaxKind.DefaultKeyword | SyntaxKind.ExportKeyword | SyntaxKind.InKeyword | SyntaxKind.NominalKeyword | SyntaxKind.PrivateKeyword | SyntaxKind.ProtectedKeyword | SyntaxKind.PublicKeyword | SyntaxKind.ReadonlyKeyword | SyntaxKind.OutKeyword | SyntaxKind.OverrideKeyword | SyntaxKind.StaticKeyword;
 export type KeywordTypeSyntaxKind = SyntaxKind.AnyKeyword | SyntaxKind.BigIntKeyword | SyntaxKind.BooleanKeyword | SyntaxKind.IntrinsicKeyword | SyntaxKind.NeverKeyword | SyntaxKind.NumberKeyword | SyntaxKind.ObjectKeyword | SyntaxKind.StringKeyword | SyntaxKind.SymbolKeyword | SyntaxKind.UndefinedKeyword | SyntaxKind.UnknownKeyword | SyntaxKind.VoidKeyword;
 export type KeywordExpressionSyntaxKind = SyntaxKind.NullKeyword | SyntaxKind.TrueKeyword | SyntaxKind.FalseKeyword | SyntaxKind.ThisKeyword | SyntaxKind.SuperKeyword | SyntaxKind.ImportKeyword;
 export type TokenSyntaxKind =
@@ -332,6 +333,7 @@ export type TokenSyntaxKind =
     | SyntaxKind.OverrideKeyword
     | SyntaxKind.OfKeyword
     | SyntaxKind.DeferKeyword
+    | SyntaxKind.NominalKeyword
     | SyntaxKind.SourceKeyword;
 export type JsxTokenSyntaxKind = SyntaxKind.LessThanSlashToken | SyntaxKind.EndOfFile | SyntaxKind.ConflictMarkerTrivia | SyntaxKind.JsxText | SyntaxKind.JsxTextAllWhiteSpaces | SyntaxKind.OpenBraceToken | SyntaxKind.LessThanToken;
 export type JSDocNodeSyntaxKind =
@@ -1414,7 +1416,7 @@ export type BooleanLiteral = TrueLiteral | FalseLiteral;
 export type ConciseBody = Block | Expression;
 export type DestructuringAssignment = ObjectDestructuringAssignment | ArrayDestructuringAssignment;
 export type LiteralToken = NumericLiteral | BigIntLiteral | StringLiteral | JsxText | RegularExpressionLiteral | NoSubstitutionTemplateLiteral;
-export type Modifier = AbstractKeyword | AccessorKeyword | AsyncKeyword | ConstKeyword | DeclareKeyword | DefaultKeyword | ExportKeyword | InKeyword | PrivateKeyword | ProtectedKeyword | PublicKeyword | ReadonlyKeyword | OutKeyword | OverrideKeyword | StaticKeyword;
+export type Modifier = AbstractKeyword | AccessorKeyword | AsyncKeyword | ConstKeyword | DeclareKeyword | DefaultKeyword | ExportKeyword | InKeyword | NominalKeyword | PrivateKeyword | ProtectedKeyword | PublicKeyword | ReadonlyKeyword | OutKeyword | OverrideKeyword | StaticKeyword;
 export type ObjectLiteralElementLike = PropertyAssignment | ShorthandPropertyAssignment | SpreadAssignment | MethodDeclaration | GetAccessorDeclaration | SetAccessorDeclaration;
 export type PropertyNameLiteral = Identifier | StringLiteral | NumericLiteral;
 export type PseudoLiteralToken = TemplateHead | TemplateMiddle | TemplateTail;
@@ -1487,6 +1489,7 @@ export type DeclareKeyword = Token<SyntaxKind.DeclareKeyword>;
 export type DefaultKeyword = Token<SyntaxKind.DefaultKeyword>;
 export type ExportKeyword = Token<SyntaxKind.ExportKeyword>;
 export type InKeyword = Token<SyntaxKind.InKeyword>;
+export type NominalKeyword = Token<SyntaxKind.NominalKeyword>;
 export type PrivateKeyword = Token<SyntaxKind.PrivateKeyword>;
 export type ProtectedKeyword = Token<SyntaxKind.ProtectedKeyword>;
 export type PublicKeyword = Token<SyntaxKind.PublicKeyword>;

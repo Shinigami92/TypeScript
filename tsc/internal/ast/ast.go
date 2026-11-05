@@ -1573,6 +1573,7 @@ func (node *Token) computeSubtreeFacts() SubtreeFacts {
 		KindInKeyword,
 		KindOutKeyword,
 		KindOverrideKeyword,
+		KindNominalKeyword,
 		KindStringKeyword,
 		KindBooleanKeyword,
 		KindSymbolKeyword,

@@ -1,0 +1,216 @@
+//// [tests/cases/compiler/nominalTypesAssignability.ts] ////
+
+=== nominalTypesAssignability.ts ===
+nominal type UserId = string;
+>UserId : UserId
+
+nominal type OrderId = string;
+>OrderId : OrderId
+
+// Creating values
+const u0: UserId = "u-1"; // error
+>u0 : UserId
+>"u-1" : "u-1"
+
+const u1 = "u-1" as UserId;
+>u1 : UserId
+>"u-1" as UserId : UserId
+>"u-1" : "u-1"
+
+const u2 = 42 as UserId; // error
+>u2 : UserId
+>42 as UserId : UserId
+>42 : 42
+
+declare const raw: unknown;
+>raw : unknown
+
+const u3 = raw as UserId;
+>u3 : UserId
+>raw as UserId : UserId
+>raw : unknown
+
+declare const anyValue: any;
+>anyValue : any
+
+const u4: UserId = anyValue;
+>u4 : UserId
+>anyValue : any
+
+function isUserId(s: string): s is UserId {
+>isUserId : (s: string) => s is UserId
+>s : string
+
+    return s.startsWith("u-");
+>s.startsWith("u-") : boolean
+>s.startsWith : (searchString: string, position?: number) => boolean
+>s : string
+>startsWith : (searchString: string, position?: number) => boolean
+>"u-" : "u-"
+}
+declare const str: string;
+>str : string
+
+if (isUserId(str)) {
+>isUserId(str) : boolean
+>isUserId : (s: string) => s is UserId
+>str : string
+
+    const narrowed: UserId = str;
+>narrowed : UserId
+>str : UserId
+}
+
+// Mixing up
+declare function getUser(id: UserId): void;
+>getUser : (id: UserId) => void
+>id : UserId
+
+declare const o1: OrderId;
+>o1 : OrderId
+
+getUser(o1); // error
+>getUser(o1) : void
+>getUser : (id: UserId) => void
+>o1 : OrderId
+
+getUser("u-1"); // error
+>getUser("u-1") : void
+>getUser : (id: UserId) => void
+>"u-1" : "u-1"
+
+getUser(u1);
+>getUser(u1) : void
+>getUser : (id: UserId) => void
+>u1 : UserId
+
+const u5 = o1 as UserId; // error, sibling cast
+>u5 : UserId
+>o1 as UserId : UserId
+>o1 : OrderId
+
+const u6 = o1 as string as UserId;
+>u6 : UserId
+>o1 as string as UserId : UserId
+>o1 as string : string
+>o1 : OrderId
+
+// Using it as the base type
+const s: string = u1;
+>s : string
+>u1 : UserId
+
+const upper: string = u1.toUpperCase();
+>upper : string
+>u1.toUpperCase() : string
+>u1.toUpperCase : () => string
+>u1 : UserId
+>toUpperCase : () => string
+
+const len: number = u1.length;
+>len : number
+>u1.length : number
+>u1 : UserId
+>length : number
+
+const eq1 = u1 === "u-1";
+>eq1 : boolean
+>u1 === "u-1" : boolean
+>u1 : UserId
+>"u-1" : "u-1"
+
+const eq2 = u1 === o1; // error
+>eq2 : boolean
+>u1 === o1 : boolean
+>u1 : UserId
+>o1 : OrderId
+
+declare const maybe: UserId | number;
+>maybe : number | UserId
+
+if (typeof maybe === "string") {
+>typeof maybe === "string" : boolean
+>typeof maybe : "bigint" | "boolean" | "function" | "number" | "object" | "string" | "symbol" | "undefined"
+>maybe : number | UserId
+>"string" : "string"
+
+    const narrowed: UserId = maybe;
+>narrowed : UserId
+>maybe : UserId
+}
+const template = `id: ${u1}`;
+>template : string
+>`id: ${u1}` : string
+>u1 : UserId
+
+// Hierarchies
+nominal type NodeId = string;
+>NodeId : NodeId
+
+nominal type MediaId = NodeId;
+>MediaId : MediaId
+
+nominal type StreamId = MediaId;
+>StreamId : StreamId
+
+nominal type VideoId = MediaId;
+>VideoId : VideoId
+
+declare const video: VideoId, node: NodeId, stream: StreamId;
+>video : VideoId
+>node : NodeId
+>stream : StreamId
+
+const n1: NodeId = video;
+>n1 : NodeId
+>video : VideoId
+
+const n2: MediaId = video;
+>n2 : MediaId
+>video : VideoId
+
+const n3: string = video;
+>n3 : string
+>video : VideoId
+
+const v1: VideoId = node; // error
+>v1 : VideoId
+>node : NodeId
+
+const v2: VideoId = stream; // error, siblings
+>v2 : VideoId
+>stream : StreamId
+
+const v3 = node as VideoId;
+>v3 : VideoId
+>node as VideoId : VideoId
+>node : NodeId
+
+const v4 = stream as VideoId; // error, not on a path
+>v4 : VideoId
+>stream as VideoId : VideoId
+>stream : StreamId
+
+const v5 = "x" as VideoId;
+>v5 : VideoId
+>"x" as VideoId : VideoId
+>"x" : "x"
+
+// Unions
+declare const idOrUndefined: UserId | undefined;
+>idOrUndefined : UserId | undefined
+
+const maybeId: string | undefined = idOrUndefined;
+>maybeId : string | undefined
+>idOrUndefined : UserId | undefined
+
+if (idOrUndefined !== undefined) {
+>idOrUndefined !== undefined : boolean
+>idOrUndefined : UserId | undefined
+>undefined : undefined
+
+    const definitelyId: UserId = idOrUndefined;
+>definitelyId : UserId
+>idOrUndefined : UserId & ({} | null)
+}
+

@@ -222,6 +222,7 @@ import type {
     NamespaceImport,
     NewExpression,
     Node,
+    NominalKeyword,
     NonNullExpression,
     NoSubstitutionTemplateLiteral,
     NotEmittedStatement,
@@ -2252,7 +2253,7 @@ isBindingName.Handle = isBindingName as any;
 
 export function isModifierLike(node: Node): node is ModifierLike {
     const kind = node.kind;
-    return kind === SyntaxKind.AbstractKeyword || kind === SyntaxKind.AccessorKeyword || kind === SyntaxKind.AsyncKeyword || kind === SyntaxKind.ConstKeyword || kind === SyntaxKind.DeclareKeyword || kind === SyntaxKind.DefaultKeyword || kind === SyntaxKind.ExportKeyword || kind === SyntaxKind.InKeyword || kind === SyntaxKind.PrivateKeyword || kind === SyntaxKind.ProtectedKeyword || kind === SyntaxKind.PublicKeyword || kind === SyntaxKind.ReadonlyKeyword || kind === SyntaxKind.OutKeyword || kind === SyntaxKind.OverrideKeyword || kind === SyntaxKind.StaticKeyword || kind === SyntaxKind.Decorator;
+    return kind === SyntaxKind.AbstractKeyword || kind === SyntaxKind.AccessorKeyword || kind === SyntaxKind.AsyncKeyword || kind === SyntaxKind.ConstKeyword || kind === SyntaxKind.DeclareKeyword || kind === SyntaxKind.DefaultKeyword || kind === SyntaxKind.ExportKeyword || kind === SyntaxKind.InKeyword || kind === SyntaxKind.NominalKeyword || kind === SyntaxKind.PrivateKeyword || kind === SyntaxKind.ProtectedKeyword || kind === SyntaxKind.PublicKeyword || kind === SyntaxKind.ReadonlyKeyword || kind === SyntaxKind.OutKeyword || kind === SyntaxKind.OverrideKeyword || kind === SyntaxKind.StaticKeyword || kind === SyntaxKind.Decorator;
 }
 
 export declare namespace isModifierLike {
@@ -2739,6 +2740,7 @@ export function isModifierKind(kind: SyntaxKind): kind is ModifierSyntaxKind {
         || kind === SyntaxKind.DefaultKeyword
         || kind === SyntaxKind.ExportKeyword
         || kind === SyntaxKind.InKeyword
+        || kind === SyntaxKind.NominalKeyword
         || kind === SyntaxKind.PrivateKeyword
         || kind === SyntaxKind.ProtectedKeyword
         || kind === SyntaxKind.PublicKeyword
@@ -3184,6 +3186,16 @@ export declare namespace isInKeyword {
 }
 
 isInKeyword.Handle = isInKeyword as any;
+
+export function isNominalKeyword(node: Node): node is NominalKeyword {
+    return node.kind === SyntaxKind.NominalKeyword;
+}
+
+export declare namespace isNominalKeyword {
+    function Handle<T extends NodeHandleLike<Node>>(node: T): node is SpecializeNodeHandle<T, NominalKeyword>;
+}
+
+isNominalKeyword.Handle = isNominalKeyword as any;
 
 export function isPrivateKeyword(node: Node): node is PrivateKeyword {
     return node.kind === SyntaxKind.PrivateKeyword;

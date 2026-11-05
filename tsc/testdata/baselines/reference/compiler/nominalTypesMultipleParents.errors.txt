@@ -1,0 +1,58 @@
+nominalTypesMultipleParents.ts(14,7): error TS2322: Type 'HttpPort' is not assignable to type 'Both'.
+nominalTypesMultipleParents.ts(32,14): error TS2885: Nominal type 'Broken' has no possible values because the base types of its parent types do not overlap.
+nominalTypesMultipleParents.ts(34,14): error TS2884: Nominal type 'Self' circularly references itself as its base type.
+nominalTypesMultipleParents.ts(35,14): error TS2884: Nominal type 'A' circularly references itself as its base type.
+nominalTypesMultipleParents.ts(36,14): error TS2884: Nominal type 'B' circularly references itself as its base type.
+
+
+==== nominalTypesMultipleParents.ts (5 errors) ====
+    nominal type Port = number;
+    nominal type HttpPort = Port & (80 | 8080);
+    nominal type WellKnownPort = Port & (80 | 443);
+    nominal type Both = HttpPort & WellKnownPort;
+    
+    declare const both: Both;
+    const hp: HttpPort = both;
+    const wk: WellKnownPort = both;
+    const port: Port = both;
+    const lit: 80 = both;
+    const num: number = both;
+    
+    declare const http: HttpPort;
+    const notBoth: Both = http; // error
+          ~~~~~~~
+!!! error TS2322: Type 'HttpPort' is not assignable to type 'Both'.
+    const http80: 80 | 8080 = http;
+    const asBoth = http as Both;
+    
+    type AnyKnownPort = HttpPort | WellKnownPort;
+    declare const anyKnown: AnyKnownPort;
+    const anyKnownLit: 80 | 443 | 8080 = anyKnown;
+    
+    nominal type Trimmed = string;
+    nominal type Lowercased = string;
+    nominal type Normalized = Trimmed & Lowercased;
+    declare const normalized: Normalized;
+    const trimmed: Trimmed = normalized;
+    const lowercased: Lowercased = normalized;
+    const plain: string = normalized;
+    
+    nominal type Meters = number;
+    nominal type UserId = string;
+    nominal type Broken = Meters & UserId; // error
+                 ~~~~~~
+!!! error TS2885: Nominal type 'Broken' has no possible values because the base types of its parent types do not overlap.
+    
+    nominal type Self = Self; // error
+                 ~~~~
+!!! error TS2884: Nominal type 'Self' circularly references itself as its base type.
+    nominal type A = B; // error
+                 ~
+!!! error TS2884: Nominal type 'A' circularly references itself as its base type.
+    nominal type B = A; // error
+                 ~
+!!! error TS2884: Nominal type 'B' circularly references itself as its base type.
+    nominal type Tree = { children: Tree[] };
+    declare const tree: Tree;
+    const firstChild: Tree = tree.children[0];
+    

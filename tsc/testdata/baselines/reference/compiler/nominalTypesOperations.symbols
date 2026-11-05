@@ -1,0 +1,213 @@
+//// [tests/cases/compiler/nominalTypesOperations.ts] ////
+
+=== nominalTypesOperations.ts ===
+nominal type UserId = string;
+>UserId : Symbol(UserId, Decl(nominalTypesOperations.ts, 0, 0))
+
+nominal type Meters = number;
+>Meters : Symbol(Meters, Decl(nominalTypesOperations.ts, 0, 29))
+
+nominal type Seconds = number;
+>Seconds : Symbol(Seconds, Decl(nominalTypesOperations.ts, 1, 29))
+
+nominal type Point = [x: number, y: number];
+>Point : Symbol(Point, Decl(nominalTypesOperations.ts, 2, 30))
+
+nominal type Customer = { name: string };
+>Customer : Symbol(Customer, Decl(nominalTypesOperations.ts, 3, 44))
+>name : Symbol(name, Decl(nominalTypesOperations.ts, 4, 25))
+
+interface Client { name: string }
+>Client : Symbol(Client, Decl(nominalTypesOperations.ts, 4, 41))
+>name : Symbol(Client.name, Decl(nominalTypesOperations.ts, 5, 18))
+
+// Arithmetic
+declare const d: Meters, t: Seconds;
+>d : Symbol(d, Decl(nominalTypesOperations.ts, 8, 13))
+>Meters : Symbol(Meters, Decl(nominalTypesOperations.ts, 0, 29))
+>t : Symbol(t, Decl(nominalTypesOperations.ts, 8, 24))
+>Seconds : Symbol(Seconds, Decl(nominalTypesOperations.ts, 1, 29))
+
+const sum: number = d + d;
+>sum : Symbol(sum, Decl(nominalTypesOperations.ts, 9, 5))
+>d : Symbol(d, Decl(nominalTypesOperations.ts, 8, 13))
+>d : Symbol(d, Decl(nominalTypesOperations.ts, 8, 13))
+
+const mixed: number = d + t;
+>mixed : Symbol(mixed, Decl(nominalTypesOperations.ts, 10, 5))
+>d : Symbol(d, Decl(nominalTypesOperations.ts, 8, 13))
+>t : Symbol(t, Decl(nominalTypesOperations.ts, 8, 24))
+
+let counter = 0 as Meters;
+>counter : Symbol(counter, Decl(nominalTypesOperations.ts, 11, 3))
+>Meters : Symbol(Meters, Decl(nominalTypesOperations.ts, 0, 29))
+
+counter++;
+>counter : Symbol(counter, Decl(nominalTypesOperations.ts, 11, 3))
+
+counter--;
+>counter : Symbol(counter, Decl(nominalTypesOperations.ts, 11, 3))
+
+counter += 1;
+>counter : Symbol(counter, Decl(nominalTypesOperations.ts, 11, 3))
+
+counter *= 2;
+>counter : Symbol(counter, Decl(nominalTypesOperations.ts, 11, 3))
+
+counter += d;
+>counter : Symbol(counter, Decl(nominalTypesOperations.ts, 11, 3))
+>d : Symbol(d, Decl(nominalTypesOperations.ts, 8, 13))
+
+counter += t; // error
+>counter : Symbol(counter, Decl(nominalTypesOperations.ts, 11, 3))
+>t : Symbol(t, Decl(nominalTypesOperations.ts, 8, 24))
+
+let label = "x" as UserId;
+>label : Symbol(label, Decl(nominalTypesOperations.ts, 18, 3))
+>UserId : Symbol(UserId, Decl(nominalTypesOperations.ts, 0, 0))
+
+label += "y"; // error, base is not number
+>label : Symbol(label, Decl(nominalTypesOperations.ts, 18, 3))
+
+// Keys
+declare const u1: UserId;
+>u1 : Symbol(u1, Decl(nominalTypesOperations.ts, 22, 13))
+>UserId : Symbol(UserId, Decl(nominalTypesOperations.ts, 0, 0))
+
+const users: Record<UserId, Customer> = {};
+>users : Symbol(users, Decl(nominalTypesOperations.ts, 23, 5))
+>Record : Symbol(Record, Decl(lib.es5.d.ts, --, --))
+>UserId : Symbol(UserId, Decl(nominalTypesOperations.ts, 0, 0))
+>Customer : Symbol(Customer, Decl(nominalTypesOperations.ts, 3, 44))
+
+users[u1];
+>users : Symbol(users, Decl(nominalTypesOperations.ts, 23, 5))
+>u1 : Symbol(u1, Decl(nominalTypesOperations.ts, 22, 13))
+
+users["x"]; // error
+>users : Symbol(users, Decl(nominalTypesOperations.ts, 23, 5))
+
+declare const byId: { [id: UserId]: number };
+>byId : Symbol(byId, Decl(nominalTypesOperations.ts, 26, 13))
+>id : Symbol(id, Decl(nominalTypesOperations.ts, 26, 23))
+>UserId : Symbol(UserId, Decl(nominalTypesOperations.ts, 0, 0))
+
+byId[u1];
+>byId : Symbol(byId, Decl(nominalTypesOperations.ts, 26, 13))
+>u1 : Symbol(u1, Decl(nominalTypesOperations.ts, 22, 13))
+
+byId["x"]; // error
+>byId : Symbol(byId, Decl(nominalTypesOperations.ts, 26, 13))
+
+// Tuples
+declare const p: Point;
+>p : Symbol(p, Decl(nominalTypesOperations.ts, 31, 13))
+>Point : Symbol(Point, Decl(nominalTypesOperations.ts, 2, 30))
+
+declare function plot(x: number, y: number): void;
+>plot : Symbol(plot, Decl(nominalTypesOperations.ts, 31, 23))
+>x : Symbol(x, Decl(nominalTypesOperations.ts, 32, 22))
+>y : Symbol(y, Decl(nominalTypesOperations.ts, 32, 32))
+
+plot(...p);
+>plot : Symbol(plot, Decl(nominalTypesOperations.ts, 31, 23))
+>p : Symbol(p, Decl(nominalTypesOperations.ts, 31, 13))
+
+const [px, py] = p;
+>px : Symbol(px, Decl(nominalTypesOperations.ts, 34, 7))
+>py : Symbol(py, Decl(nominalTypesOperations.ts, 34, 10))
+>p : Symbol(p, Decl(nominalTypesOperations.ts, 31, 13))
+
+p[0];
+>p : Symbol(p, Decl(nominalTypesOperations.ts, 31, 13))
+>0 : Symbol(0)
+
+p[2]; // error
+>p : Symbol(p, Decl(nominalTypesOperations.ts, 31, 13))
+
+// Objects
+declare const client: Client;
+>client : Symbol(client, Decl(nominalTypesOperations.ts, 39, 13))
+>Client : Symbol(Client, Decl(nominalTypesOperations.ts, 4, 41))
+
+const c0: Customer = { name: "x" }; // error
+>c0 : Symbol(c0, Decl(nominalTypesOperations.ts, 40, 5))
+>Customer : Symbol(Customer, Decl(nominalTypesOperations.ts, 3, 44))
+>name : Symbol(name, Decl(nominalTypesOperations.ts, 40, 22))
+
+const c1 = { name: "x" } as Customer;
+>c1 : Symbol(c1, Decl(nominalTypesOperations.ts, 41, 5))
+>name : Symbol(name, Decl(nominalTypesOperations.ts, 41, 12))
+>Customer : Symbol(Customer, Decl(nominalTypesOperations.ts, 3, 44))
+
+const c2: Customer = client; // error
+>c2 : Symbol(c2, Decl(nominalTypesOperations.ts, 42, 5))
+>Customer : Symbol(Customer, Decl(nominalTypesOperations.ts, 3, 44))
+>client : Symbol(client, Decl(nominalTypesOperations.ts, 39, 13))
+
+const c3: Client = c1;
+>c3 : Symbol(c3, Decl(nominalTypesOperations.ts, 43, 5))
+>Client : Symbol(Client, Decl(nominalTypesOperations.ts, 4, 41))
+>c1 : Symbol(c1, Decl(nominalTypesOperations.ts, 41, 5))
+
+c1.name;
+>c1.name : Symbol(name, Decl(nominalTypesOperations.ts, 4, 25))
+>c1 : Symbol(c1, Decl(nominalTypesOperations.ts, 41, 5))
+>name : Symbol(name, Decl(nominalTypesOperations.ts, 4, 25))
+
+type K = keyof Customer;
+>K : Symbol(K, Decl(nominalTypesOperations.ts, 44, 8))
+>Customer : Symbol(Customer, Decl(nominalTypesOperations.ts, 3, 44))
+
+const k: K = "name";
+>k : Symbol(k, Decl(nominalTypesOperations.ts, 46, 5))
+>K : Symbol(K, Decl(nominalTypesOperations.ts, 44, 8))
+
+// Mapped types
+type P = Partial<Customer>;
+>P : Symbol(P, Decl(nominalTypesOperations.ts, 46, 20))
+>Partial : Symbol(Partial, Decl(lib.es5.d.ts, --, --))
+>Customer : Symbol(Customer, Decl(nominalTypesOperations.ts, 3, 44))
+
+const pp: P = {};
+>pp : Symbol(pp, Decl(nominalTypesOperations.ts, 50, 5))
+>P : Symbol(P, Decl(nominalTypesOperations.ts, 46, 20))
+
+type PU = Partial<UserId>;
+>PU : Symbol(PU, Decl(nominalTypesOperations.ts, 50, 17))
+>Partial : Symbol(Partial, Decl(lib.es5.d.ts, --, --))
+>UserId : Symbol(UserId, Decl(nominalTypesOperations.ts, 0, 0))
+
+const pu1: PU = u1;
+>pu1 : Symbol(pu1, Decl(nominalTypesOperations.ts, 52, 5))
+>PU : Symbol(PU, Decl(nominalTypesOperations.ts, 50, 17))
+>u1 : Symbol(u1, Decl(nominalTypesOperations.ts, 22, 13))
+
+const pu2: PU = "plain"; // error
+>pu2 : Symbol(pu2, Decl(nominalTypesOperations.ts, 53, 5))
+>PU : Symbol(PU, Decl(nominalTypesOperations.ts, 50, 17))
+
+type DeepPartial<T> = { [K in keyof T]?: DeepPartial<T[K]> };
+>DeepPartial : Symbol(DeepPartial, Decl(nominalTypesOperations.ts, 53, 24))
+>T : Symbol(T, Decl(nominalTypesOperations.ts, 54, 17))
+>K : Symbol(K, Decl(nominalTypesOperations.ts, 54, 25))
+>T : Symbol(T, Decl(nominalTypesOperations.ts, 54, 17))
+>DeepPartial : Symbol(DeepPartial, Decl(nominalTypesOperations.ts, 53, 24))
+>T : Symbol(T, Decl(nominalTypesOperations.ts, 54, 17))
+>K : Symbol(K, Decl(nominalTypesOperations.ts, 54, 25))
+
+const dp1: DeepPartial<{ id: UserId }> = { id: u1 };
+>dp1 : Symbol(dp1, Decl(nominalTypesOperations.ts, 55, 5))
+>DeepPartial : Symbol(DeepPartial, Decl(nominalTypesOperations.ts, 53, 24))
+>id : Symbol(id, Decl(nominalTypesOperations.ts, 55, 24))
+>UserId : Symbol(UserId, Decl(nominalTypesOperations.ts, 0, 0))
+>id : Symbol(id, Decl(nominalTypesOperations.ts, 55, 42))
+>u1 : Symbol(u1, Decl(nominalTypesOperations.ts, 22, 13))
+
+const dp2: DeepPartial<{ id: UserId }> = { id: "plain" }; // error
+>dp2 : Symbol(dp2, Decl(nominalTypesOperations.ts, 56, 5))
+>DeepPartial : Symbol(DeepPartial, Decl(nominalTypesOperations.ts, 53, 24))
+>id : Symbol(id, Decl(nominalTypesOperations.ts, 56, 24))
+>UserId : Symbol(UserId, Decl(nominalTypesOperations.ts, 0, 0))
+>id : Symbol(id, Decl(nominalTypesOperations.ts, 56, 42))
+

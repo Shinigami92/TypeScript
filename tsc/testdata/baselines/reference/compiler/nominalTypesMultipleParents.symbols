@@ -1,0 +1,145 @@
+//// [tests/cases/compiler/nominalTypesMultipleParents.ts] ////
+
+=== nominalTypesMultipleParents.ts ===
+nominal type Port = number;
+>Port : Symbol(Port, Decl(nominalTypesMultipleParents.ts, 0, 0))
+
+nominal type HttpPort = Port & (80 | 8080);
+>HttpPort : Symbol(HttpPort, Decl(nominalTypesMultipleParents.ts, 0, 27))
+>Port : Symbol(Port, Decl(nominalTypesMultipleParents.ts, 0, 0))
+
+nominal type WellKnownPort = Port & (80 | 443);
+>WellKnownPort : Symbol(WellKnownPort, Decl(nominalTypesMultipleParents.ts, 1, 43))
+>Port : Symbol(Port, Decl(nominalTypesMultipleParents.ts, 0, 0))
+
+nominal type Both = HttpPort & WellKnownPort;
+>Both : Symbol(Both, Decl(nominalTypesMultipleParents.ts, 2, 47))
+>HttpPort : Symbol(HttpPort, Decl(nominalTypesMultipleParents.ts, 0, 27))
+>WellKnownPort : Symbol(WellKnownPort, Decl(nominalTypesMultipleParents.ts, 1, 43))
+
+declare const both: Both;
+>both : Symbol(both, Decl(nominalTypesMultipleParents.ts, 5, 13))
+>Both : Symbol(Both, Decl(nominalTypesMultipleParents.ts, 2, 47))
+
+const hp: HttpPort = both;
+>hp : Symbol(hp, Decl(nominalTypesMultipleParents.ts, 6, 5))
+>HttpPort : Symbol(HttpPort, Decl(nominalTypesMultipleParents.ts, 0, 27))
+>both : Symbol(both, Decl(nominalTypesMultipleParents.ts, 5, 13))
+
+const wk: WellKnownPort = both;
+>wk : Symbol(wk, Decl(nominalTypesMultipleParents.ts, 7, 5))
+>WellKnownPort : Symbol(WellKnownPort, Decl(nominalTypesMultipleParents.ts, 1, 43))
+>both : Symbol(both, Decl(nominalTypesMultipleParents.ts, 5, 13))
+
+const port: Port = both;
+>port : Symbol(port, Decl(nominalTypesMultipleParents.ts, 8, 5))
+>Port : Symbol(Port, Decl(nominalTypesMultipleParents.ts, 0, 0))
+>both : Symbol(both, Decl(nominalTypesMultipleParents.ts, 5, 13))
+
+const lit: 80 = both;
+>lit : Symbol(lit, Decl(nominalTypesMultipleParents.ts, 9, 5))
+>both : Symbol(both, Decl(nominalTypesMultipleParents.ts, 5, 13))
+
+const num: number = both;
+>num : Symbol(num, Decl(nominalTypesMultipleParents.ts, 10, 5))
+>both : Symbol(both, Decl(nominalTypesMultipleParents.ts, 5, 13))
+
+declare const http: HttpPort;
+>http : Symbol(http, Decl(nominalTypesMultipleParents.ts, 12, 13))
+>HttpPort : Symbol(HttpPort, Decl(nominalTypesMultipleParents.ts, 0, 27))
+
+const notBoth: Both = http; // error
+>notBoth : Symbol(notBoth, Decl(nominalTypesMultipleParents.ts, 13, 5))
+>Both : Symbol(Both, Decl(nominalTypesMultipleParents.ts, 2, 47))
+>http : Symbol(http, Decl(nominalTypesMultipleParents.ts, 12, 13))
+
+const http80: 80 | 8080 = http;
+>http80 : Symbol(http80, Decl(nominalTypesMultipleParents.ts, 14, 5))
+>http : Symbol(http, Decl(nominalTypesMultipleParents.ts, 12, 13))
+
+const asBoth = http as Both;
+>asBoth : Symbol(asBoth, Decl(nominalTypesMultipleParents.ts, 15, 5))
+>http : Symbol(http, Decl(nominalTypesMultipleParents.ts, 12, 13))
+>Both : Symbol(Both, Decl(nominalTypesMultipleParents.ts, 2, 47))
+
+type AnyKnownPort = HttpPort | WellKnownPort;
+>AnyKnownPort : Symbol(AnyKnownPort, Decl(nominalTypesMultipleParents.ts, 15, 28))
+>HttpPort : Symbol(HttpPort, Decl(nominalTypesMultipleParents.ts, 0, 27))
+>WellKnownPort : Symbol(WellKnownPort, Decl(nominalTypesMultipleParents.ts, 1, 43))
+
+declare const anyKnown: AnyKnownPort;
+>anyKnown : Symbol(anyKnown, Decl(nominalTypesMultipleParents.ts, 18, 13))
+>AnyKnownPort : Symbol(AnyKnownPort, Decl(nominalTypesMultipleParents.ts, 15, 28))
+
+const anyKnownLit: 80 | 443 | 8080 = anyKnown;
+>anyKnownLit : Symbol(anyKnownLit, Decl(nominalTypesMultipleParents.ts, 19, 5))
+>anyKnown : Symbol(anyKnown, Decl(nominalTypesMultipleParents.ts, 18, 13))
+
+nominal type Trimmed = string;
+>Trimmed : Symbol(Trimmed, Decl(nominalTypesMultipleParents.ts, 19, 46))
+
+nominal type Lowercased = string;
+>Lowercased : Symbol(Lowercased, Decl(nominalTypesMultipleParents.ts, 21, 30))
+
+nominal type Normalized = Trimmed & Lowercased;
+>Normalized : Symbol(Normalized, Decl(nominalTypesMultipleParents.ts, 22, 33))
+>Trimmed : Symbol(Trimmed, Decl(nominalTypesMultipleParents.ts, 19, 46))
+>Lowercased : Symbol(Lowercased, Decl(nominalTypesMultipleParents.ts, 21, 30))
+
+declare const normalized: Normalized;
+>normalized : Symbol(normalized, Decl(nominalTypesMultipleParents.ts, 24, 13))
+>Normalized : Symbol(Normalized, Decl(nominalTypesMultipleParents.ts, 22, 33))
+
+const trimmed: Trimmed = normalized;
+>trimmed : Symbol(trimmed, Decl(nominalTypesMultipleParents.ts, 25, 5))
+>Trimmed : Symbol(Trimmed, Decl(nominalTypesMultipleParents.ts, 19, 46))
+>normalized : Symbol(normalized, Decl(nominalTypesMultipleParents.ts, 24, 13))
+
+const lowercased: Lowercased = normalized;
+>lowercased : Symbol(lowercased, Decl(nominalTypesMultipleParents.ts, 26, 5))
+>Lowercased : Symbol(Lowercased, Decl(nominalTypesMultipleParents.ts, 21, 30))
+>normalized : Symbol(normalized, Decl(nominalTypesMultipleParents.ts, 24, 13))
+
+const plain: string = normalized;
+>plain : Symbol(plain, Decl(nominalTypesMultipleParents.ts, 27, 5))
+>normalized : Symbol(normalized, Decl(nominalTypesMultipleParents.ts, 24, 13))
+
+nominal type Meters = number;
+>Meters : Symbol(Meters, Decl(nominalTypesMultipleParents.ts, 27, 33))
+
+nominal type UserId = string;
+>UserId : Symbol(UserId, Decl(nominalTypesMultipleParents.ts, 29, 29))
+
+nominal type Broken = Meters & UserId; // error
+>Broken : Symbol(Broken, Decl(nominalTypesMultipleParents.ts, 30, 29))
+>Meters : Symbol(Meters, Decl(nominalTypesMultipleParents.ts, 27, 33))
+>UserId : Symbol(UserId, Decl(nominalTypesMultipleParents.ts, 29, 29))
+
+nominal type Self = Self; // error
+>Self : Symbol(Self, Decl(nominalTypesMultipleParents.ts, 31, 38))
+>Self : Symbol(Self, Decl(nominalTypesMultipleParents.ts, 31, 38))
+
+nominal type A = B; // error
+>A : Symbol(A, Decl(nominalTypesMultipleParents.ts, 33, 25))
+>B : Symbol(B, Decl(nominalTypesMultipleParents.ts, 34, 19))
+
+nominal type B = A; // error
+>B : Symbol(B, Decl(nominalTypesMultipleParents.ts, 34, 19))
+>A : Symbol(A, Decl(nominalTypesMultipleParents.ts, 33, 25))
+
+nominal type Tree = { children: Tree[] };
+>Tree : Symbol(Tree, Decl(nominalTypesMultipleParents.ts, 35, 19))
+>children : Symbol(children, Decl(nominalTypesMultipleParents.ts, 36, 21))
+>Tree : Symbol(Tree, Decl(nominalTypesMultipleParents.ts, 35, 19))
+
+declare const tree: Tree;
+>tree : Symbol(tree, Decl(nominalTypesMultipleParents.ts, 37, 13))
+>Tree : Symbol(Tree, Decl(nominalTypesMultipleParents.ts, 35, 19))
+
+const firstChild: Tree = tree.children[0];
+>firstChild : Symbol(firstChild, Decl(nominalTypesMultipleParents.ts, 38, 5))
+>Tree : Symbol(Tree, Decl(nominalTypesMultipleParents.ts, 35, 19))
+>tree.children : Symbol(children, Decl(nominalTypesMultipleParents.ts, 36, 21))
+>tree : Symbol(tree, Decl(nominalTypesMultipleParents.ts, 37, 13))
+>children : Symbol(children, Decl(nominalTypesMultipleParents.ts, 36, 21))
+

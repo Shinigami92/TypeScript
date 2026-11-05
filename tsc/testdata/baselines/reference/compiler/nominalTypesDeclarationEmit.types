@@ -1,0 +1,50 @@
+//// [tests/cases/compiler/nominalTypesDeclarationEmit.ts] ////
+
+=== nominalTypesDeclarationEmit.ts ===
+export nominal type UserId = string;
+>UserId : UserId
+
+nominal type Local = number;
+>Local : Local
+
+export declare nominal type Handle = number;
+>Handle : Handle
+
+export nominal type MediaId = UserId;
+>MediaId : MediaId
+
+export function make(s: string) {
+>make : (s: string) => UserId
+>s : string
+
+    return s as UserId;
+>s as UserId : UserId
+>s : string
+}
+export const local = 1 as Local;
+>local : Local
+>1 as Local : Local
+>1 : 1
+
+export const both = { id: make("x"), media: "m" as MediaId };
+>both : { id: UserId; media: MediaId; }
+>{ id: make("x"), media: "m" as MediaId } : { id: UserId; media: MediaId; }
+>id : UserId
+>make("x") : UserId
+>make : (s: string) => UserId
+>"x" : "x"
+>media : MediaId
+>"m" as MediaId : MediaId
+>"m" : "m"
+
+export function f() {
+>f : () => Inner
+
+    nominal type Inner = string;
+>Inner : Inner
+
+    return "x" as Inner; // error
+>"x" as Inner : Inner
+>"x" : "x"
+}
+

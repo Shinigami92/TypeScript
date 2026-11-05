@@ -1068,6 +1068,8 @@ func ModifierToFlag(token Kind) ModifierFlags {
 		return ModifierFlagsIn
 	case KindOutKeyword:
 		return ModifierFlagsOut
+	case KindNominalKeyword:
+		return ModifierFlagsNominal
 	case KindDecorator:
 		return ModifierFlagsDecorator
 	}
@@ -3414,6 +3416,9 @@ func CreateModifiersFromModifierFlags(flags ModifierFlags, createModifier func(k
 	}
 	if flags&ModifierFlagsOut != 0 {
 		result = append(result, createModifier(KindOutKeyword))
+	}
+	if flags&ModifierFlagsNominal != 0 {
+		result = append(result, createModifier(KindNominalKeyword))
 	}
 	return result
 }

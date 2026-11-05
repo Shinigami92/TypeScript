@@ -1,0 +1,54 @@
+//// [tests/cases/compiler/nominalTypesGrammar.ts] ////
+
+=== nominalTypesGrammar.ts ===
+// 'nominal' is a contextual keyword
+const nominal = 1;
+>nominal : 1
+>1 : 1
+
+nominal
+>nominal : 1
+
+type X = 1;
+>X : 1
+
+const y = nominal + 1;
+>y : number
+>nominal + 1 : number
+>nominal : 1
+>1 : 1
+
+export nominal type Email = string;
+>Email : Email
+
+declare nominal type Handle = number;
+>Handle : Handle
+
+export declare nominal type Token = string;
+>Token : Token
+
+nominal interface I {} // error
+nominal class C {} // error
+>C : C
+
+nominal const z = 1; // error
+>z : 1
+>1 : 1
+
+nominal type G<T> = string; // error
+>G : string
+
+nominal nominal type Twice = string; // error
+>Twice : Twice
+
+function f() {
+>f : () => Local
+
+    nominal type Local = string;
+>Local : Local
+
+    return "x" as Local;
+>"x" as Local : Local
+>"x" : "x"
+}
+

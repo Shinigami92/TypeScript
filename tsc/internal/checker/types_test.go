@@ -66,6 +66,7 @@ func TestTypeCasts(t *testing.T) {
 		{typeKindIntrinsic, &IntrinsicType{}, func(t *Type) any { return t.AsIntrinsicType() }},
 		{typeKindLiteral, &LiteralType{}, func(t *Type) any { return t.AsLiteralType() }},
 		{typeKindUniqueESSymbol, &UniqueESSymbolType{}, func(t *Type) any { return t.AsUniqueESSymbolType() }},
+		{typeKindNominal, &NominalType{}, func(t *Type) any { return t.AsNominalType() }},
 		{typeKindTypeParameter, &TypeParameter{}, func(t *Type) any { return t.AsTypeParameter() }},
 		{typeKindIndex, &IndexType{}, func(t *Type) any { return t.AsIndexType() }},
 		{typeKindIndexedAccess, &IndexedAccessType{}, func(t *Type) any { return t.AsIndexedAccessType() }},

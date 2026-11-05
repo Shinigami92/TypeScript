@@ -214,6 +214,7 @@ func (d *astDecoder) createChildrenNode(kind ast.Kind, data uint32, childIndices
 		ast.KindOverrideKeyword,
 		ast.KindOfKeyword,
 		ast.KindDeferKeyword,
+		ast.KindNominalKeyword,
 		ast.KindSourceKeyword:
 		return d.factory.NewToken(kind), nil
 	case ast.KindQualifiedName:

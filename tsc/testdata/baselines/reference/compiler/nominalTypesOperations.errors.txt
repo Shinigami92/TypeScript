@@ -1,0 +1,93 @@
+nominalTypesOperations.ts(18,1): error TS2322: Type 'number' is not assignable to type 'Meters'.
+nominalTypesOperations.ts(20,1): error TS2322: Type 'string' is not assignable to type 'UserId'.
+nominalTypesOperations.ts(26,1): error TS7053: Element implicitly has an 'any' type because expression of type '"x"' can't be used to index type 'Record<UserId, Customer>'.
+  Property 'x' does not exist on type 'Record<UserId, Customer>'.
+nominalTypesOperations.ts(29,1): error TS7053: Element implicitly has an 'any' type because expression of type '"x"' can't be used to index type '{ [id: UserId]: number; }'.
+  Property 'x' does not exist on type '{ [id: UserId]: number; }'.
+nominalTypesOperations.ts(37,3): error TS2493: Tuple type 'Point' of length '2' has no element at index '2'.
+nominalTypesOperations.ts(41,7): error TS2322: Type '{ name: string; }' is not assignable to type 'Customer'.
+nominalTypesOperations.ts(43,7): error TS2322: Type 'Client' is not assignable to type 'Customer'.
+nominalTypesOperations.ts(54,7): error TS2322: Type 'string' is not assignable to type 'UserId'.
+nominalTypesOperations.ts(57,44): error TS2322: Type 'string' is not assignable to type 'UserId'.
+
+
+==== nominalTypesOperations.ts (9 errors) ====
+    nominal type UserId = string;
+    nominal type Meters = number;
+    nominal type Seconds = number;
+    nominal type Point = [x: number, y: number];
+    nominal type Customer = { name: string };
+    interface Client { name: string }
+    
+    // Arithmetic
+    declare const d: Meters, t: Seconds;
+    const sum: number = d + d;
+    const mixed: number = d + t;
+    let counter = 0 as Meters;
+    counter++;
+    counter--;
+    counter += 1;
+    counter *= 2;
+    counter += d;
+    counter += t; // error
+    ~~~~~~~
+!!! error TS2322: Type 'number' is not assignable to type 'Meters'.
+    let label = "x" as UserId;
+    label += "y"; // error, base is not number
+    ~~~~~
+!!! error TS2322: Type 'string' is not assignable to type 'UserId'.
+    
+    // Keys
+    declare const u1: UserId;
+    const users: Record<UserId, Customer> = {};
+    users[u1];
+    users["x"]; // error
+    ~~~~~~~~~~
+!!! error TS7053: Element implicitly has an 'any' type because expression of type '"x"' can't be used to index type 'Record<UserId, Customer>'.
+!!! error TS7053:   Property 'x' does not exist on type 'Record<UserId, Customer>'.
+    declare const byId: { [id: UserId]: number };
+    byId[u1];
+    byId["x"]; // error
+    ~~~~~~~~~
+!!! error TS7053: Element implicitly has an 'any' type because expression of type '"x"' can't be used to index type '{ [id: UserId]: number; }'.
+!!! error TS7053:   Property 'x' does not exist on type '{ [id: UserId]: number; }'.
+    
+    // Tuples
+    declare const p: Point;
+    declare function plot(x: number, y: number): void;
+    plot(...p);
+    const [px, py] = p;
+    p[0];
+    p[2]; // error
+      ~
+!!! error TS2493: Tuple type 'Point' of length '2' has no element at index '2'.
+    
+    // Objects
+    declare const client: Client;
+    const c0: Customer = { name: "x" }; // error
+          ~~
+!!! error TS2322: Type '{ name: string; }' is not assignable to type 'Customer'.
+    const c1 = { name: "x" } as Customer;
+    const c2: Customer = client; // error
+          ~~
+!!! error TS2322: Type 'Client' is not assignable to type 'Customer'.
+    const c3: Client = c1;
+    c1.name;
+    type K = keyof Customer;
+    const k: K = "name";
+    
+    // Mapped types
+    type P = Partial<Customer>;
+    const pp: P = {};
+    type PU = Partial<UserId>;
+    const pu1: PU = u1;
+    const pu2: PU = "plain"; // error
+          ~~~
+!!! error TS2322: Type 'string' is not assignable to type 'UserId'.
+    type DeepPartial<T> = { [K in keyof T]?: DeepPartial<T[K]> };
+    const dp1: DeepPartial<{ id: UserId }> = { id: u1 };
+    const dp2: DeepPartial<{ id: UserId }> = { id: "plain" }; // error
+                                               ~~
+!!! error TS2322: Type 'string' is not assignable to type 'UserId'.
+!!! related TS6500 nominalTypesOperations.ts:57:26: The expected type comes from property 'id' which is declared here on type 'DeepPartial<{ id: UserId; }>'
+    

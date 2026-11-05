@@ -33,6 +33,8 @@ export function modifierToFlag(kind: SyntaxKind): ModifierFlags {
             return ModifierFlags.In;
         case SyntaxKind.OutKeyword:
             return ModifierFlags.Out;
+        case SyntaxKind.NominalKeyword:
+            return ModifierFlags.Nominal;
         case SyntaxKind.Decorator:
             return ModifierFlags.Decorator;
         default:

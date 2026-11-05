@@ -134,6 +134,7 @@ export const textToKeywordObj: Record<string, KeywordSyntaxKind> = {
     namespace: SyntaxKind.NamespaceKeyword,
     never: SyntaxKind.NeverKeyword,
     new: SyntaxKind.NewKeyword,
+    nominal: SyntaxKind.NominalKeyword,
     null: SyntaxKind.NullKeyword,
     number: SyntaxKind.NumberKeyword,
     object: SyntaxKind.ObjectKeyword,

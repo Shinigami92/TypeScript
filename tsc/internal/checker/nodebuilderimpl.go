@@ -3480,6 +3480,12 @@ func (b *NodeBuilderImpl) typeToTypeNode(t *Type) *ast.TypeNode {
 			return b.f.NewLiteralTypeNode(b.f.NewKeywordExpression(ast.KindFalseKeyword))
 		}
 	}
+	if t.flags&TypeFlagsNominal != 0 {
+		// Nominal types have no structural representation and are always referenced by name. If the name is not
+		// accessible from the enclosing declaration, symbolToTypeNode reports it through the symbol tracker.
+		b.ctx.approximateLength += len(t.symbol.Name())
+		return b.symbolToTypeNode(t.symbol, ast.SymbolFlagsType, nil)
+	}
 	if t.flags&TypeFlagsUniqueESSymbol != 0 {
 		if b.ctx.flags&nodebuilder.FlagsAllowUniqueESSymbolType == 0 {
 			if b.ch.IsValueSymbolAccessible(t.symbol, b.ctx.enclosingDeclaration) {

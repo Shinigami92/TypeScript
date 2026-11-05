@@ -944,6 +944,10 @@ var X_0_is_not_a_valid_key_for_an_import_attributes_type = &Message{code: 1557, 
 
 var An_import_attributes_property_cannot_have_a_readonly_modifier = &Message{code: 1558, category: CategoryError, key: "An_import_attributes_property_cannot_have_a_readonly_modifier_1558", text: "An import attributes property cannot have a 'readonly' modifier."}
 
+var X_nominal_modifier_can_only_appear_on_a_type_alias_declaration = &Message{code: 1559, category: CategoryError, key: "nominal_modifier_can_only_appear_on_a_type_alias_declaration_1559", text: "'nominal' modifier can only appear on a type alias declaration."}
+
+var A_nominal_type_alias_cannot_have_type_parameters = &Message{code: 1560, category: CategoryError, key: "A_nominal_type_alias_cannot_have_type_parameters_1560", text: "A 'nominal' type alias cannot have type parameters."}
+
 var The_types_of_0_are_incompatible_between_these_types = &Message{code: 2200, category: CategoryError, key: "The_types_of_0_are_incompatible_between_these_types_2200", text: "The types of '{0}' are incompatible between these types."}
 
 var The_types_returned_by_0_are_incompatible_between_these_types = &Message{code: 2201, category: CategoryError, key: "The_types_returned_by_0_are_incompatible_between_these_types_2201", text: "The types returned by '{0}' are incompatible between these types."}
@@ -2021,6 +2025,10 @@ var This_expression_is_never_nullish = &Message{code: 2881, category: CategoryEr
 var Cannot_find_module_or_type_declarations_for_side_effect_import_of_0 = &Message{code: 2882, category: CategoryError, key: "Cannot_find_module_or_type_declarations_for_side_effect_import_of_0_2882", text: "Cannot find module or type declarations for side-effect import of '{0}'."}
 
 var The_inferred_type_of_0_cannot_be_named_without_a_reference_to_2_from_1_This_is_likely_not_portable_A_type_annotation_is_necessary = &Message{code: 2883, category: CategoryError, key: "The_inferred_type_of_0_cannot_be_named_without_a_reference_to_2_from_1_This_is_likely_not_portable_A_2883", text: "The inferred type of '{0}' cannot be named without a reference to '{2}' from '{1}'. This is likely not portable. A type annotation is necessary."}
+
+var Nominal_type_0_circularly_references_itself_as_its_base_type = &Message{code: 2884, category: CategoryError, key: "Nominal_type_0_circularly_references_itself_as_its_base_type_2884", text: "Nominal type '{0}' circularly references itself as its base type."}
+
+var Nominal_type_0_has_no_possible_values_because_the_base_types_of_its_parent_types_do_not_overlap = &Message{code: 2885, category: CategoryError, key: "Nominal_type_0_has_no_possible_values_because_the_base_types_of_its_parent_types_do_not_overlap_2885", text: "Nominal type '{0}' has no possible values because the base types of its parent types do not overlap."}
 
 var Import_declaration_0_is_using_private_name_1 = &Message{code: 4000, category: CategoryError, key: "Import_declaration_0_is_using_private_name_1_4000", text: "Import declaration '{0}' is using private name '{1}'."}
 
@@ -4936,6 +4944,8 @@ var allMessages = [...]**Message{
 	&An_import_attributes_property_cannot_be_optional,
 	&X_0_is_not_a_valid_key_for_an_import_attributes_type,
 	&An_import_attributes_property_cannot_have_a_readonly_modifier,
+	&X_nominal_modifier_can_only_appear_on_a_type_alias_declaration,
+	&A_nominal_type_alias_cannot_have_type_parameters,
 	&The_types_of_0_are_incompatible_between_these_types,
 	&The_types_returned_by_0_are_incompatible_between_these_types,
 	&Call_signature_return_types_0_and_1_are_incompatible,
@@ -5475,6 +5485,8 @@ var allMessages = [...]**Message{
 	&This_expression_is_never_nullish,
 	&Cannot_find_module_or_type_declarations_for_side_effect_import_of_0,
 	&The_inferred_type_of_0_cannot_be_named_without_a_reference_to_2_from_1_This_is_likely_not_portable_A_type_annotation_is_necessary,
+	&Nominal_type_0_circularly_references_itself_as_its_base_type,
+	&Nominal_type_0_has_no_possible_values_because_the_base_types_of_its_parent_types_do_not_overlap,
 	&Import_declaration_0_is_using_private_name_1,
 	&Type_parameter_0_of_exported_class_has_or_is_using_private_name_1,
 	&Type_parameter_0_of_exported_interface_has_or_is_using_private_name_1,

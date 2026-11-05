@@ -464,6 +464,15 @@ func (c *Checker) checkGrammarModifiers(node *ast.Node /*Union[HasModifiers, Has
 				}
 				flags |= ast.ModifierFlagsAmbient
 				lastDeclare = modifier
+			case ast.KindNominalKeyword:
+				if flags&ast.ModifierFlagsNominal != 0 {
+					return c.grammarErrorOnNode(modifier, diagnostics.X_0_modifier_already_seen, "nominal")
+				} else if node.Kind != ast.KindTypeAliasDeclaration {
+					return c.grammarErrorOnNode(modifier, diagnostics.X_nominal_modifier_can_only_appear_on_a_type_alias_declaration)
+				} else if node.AsTypeAliasDeclaration().TypeParameters != nil {
+					return c.grammarErrorOnNode(modifier, diagnostics.A_nominal_type_alias_cannot_have_type_parameters)
+				}
+				flags |= ast.ModifierFlagsNominal
 			case ast.KindAbstractKeyword:
 				if flags&ast.ModifierFlagsAbstract != 0 {
 					return c.grammarErrorOnNode(modifier, diagnostics.X_0_modifier_already_seen, "abstract")
@@ -623,9 +632,10 @@ func (c *Checker) findFirstIllegalModifier(node *ast.Node) *ast.Node {
 			ast.KindConstructorType:
 			return c.findFirstModifierExcept(node, ast.KindAbstractKeyword)
 		case ast.KindClassExpression,
-			ast.KindInterfaceDeclaration,
-			ast.KindTypeAliasDeclaration:
+			ast.KindInterfaceDeclaration:
 			return core.Find(node.ModifierNodes(), ast.IsModifier)
+		case ast.KindTypeAliasDeclaration:
+			return c.findFirstModifierExcept(node, ast.KindNominalKeyword)
 		case ast.KindVariableStatement:
 			if node.AsVariableStatement().DeclarationList.Flags&ast.NodeFlagsUsing != 0 {
 				return c.findFirstModifierExcept(node, ast.KindAwaitKeyword)

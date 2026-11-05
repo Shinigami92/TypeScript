@@ -65,6 +65,7 @@ const (
 	TypeSystemPropertyNameWriteType
 	TypeSystemPropertyNameInitializerIsUndefined
 	TypeSystemPropertyNameAliasTarget
+	TypeSystemPropertyNameNominalBaseType
 )
 
 type TypeResolution struct {
@@ -7115,6 +7116,10 @@ func (c *Checker) checkTypeAliasDeclaration(node *ast.Node) {
 		return //nolint:customlint // intrinsic keyword has no children to check
 	}
 	c.checkSourceElement(typeNode)
+	if isNominalTypeAliasDeclaration(node) {
+		// Resolve the base type to report circularities.
+		c.getBaseTypeOfNominalType(c.getDeclaredTypeOfSymbol(c.getSymbolOfDeclaration(node)))
+	}
 	c.registerForUnusedIdentifiersCheck(node)
 }
 
@@ -12659,7 +12664,7 @@ func (c *Checker) checkBinaryLikeExpression(left *ast.Node, operatorToken *ast.N
 			resultType = c.errorType
 		}
 		if leftOk && rightOk {
-			c.checkAssignmentOperator(left, operator, right, leftType, resultType)
+			c.checkAssignmentOperator(left, operator, right, leftType, c.getCompoundAssignmentResultTypeForNominal(operator, leftType, rightType, resultType))
 			switch operator {
 			case ast.KindLessThanLessThanToken, ast.KindLessThanLessThanEqualsToken, ast.KindGreaterThanGreaterThanToken,
 				ast.KindGreaterThanGreaterThanEqualsToken, ast.KindGreaterThanGreaterThanGreaterThanToken,
@@ -12716,7 +12721,7 @@ func (c *Checker) checkBinaryLikeExpression(left *ast.Node, operatorToken *ast.N
 			return c.anyType
 		}
 		if operator == ast.KindPlusEqualsToken {
-			c.checkAssignmentOperator(left, operator, right, leftType, resultType)
+			c.checkAssignmentOperator(left, operator, right, leftType, c.getCompoundAssignmentResultTypeForNominal(operator, leftType, rightType, resultType))
 		}
 		return resultType
 	case ast.KindLessThanToken, ast.KindGreaterThanToken, ast.KindLessThanEqualsToken, ast.KindGreaterThanEqualsToken:
@@ -13044,6 +13049,29 @@ func (c *Checker) checkAssignmentOperator(left *ast.Node, operator ast.Kind, rig
 			c.checkTypeAssignableToAndOptionallyElaborate(rightType, leftType, left, right, headMessage, nil)
 		}
 	}
+}
+
+// For a compound assignment like `meters += 1` where `meters` has a nominal number (or bigint) type, the
+// assigned value keeps the nominal type if the right operand is the same nominal type (or a subtype of it)
+// or a plain, non-nominal value. `meters += seconds` still reports an error.
+func (c *Checker) getCompoundAssignmentResultTypeForNominal(operator ast.Kind, leftType *Type, rightType *Type, resultType *Type) *Type {
+	if !ast.IsCompoundAssignment(operator) || leftType.flags&TypeFlagsNominal == 0 || resultType.flags&(TypeFlagsNumber|TypeFlagsBigInt) == 0 {
+		return resultType
+	}
+	if c.isTypeAssignableTo(rightType, leftType) || !c.containsNominalType(rightType) {
+		return leftType
+	}
+	return resultType
+}
+
+func (c *Checker) containsNominalType(t *Type) bool {
+	if t.flags&TypeFlagsNominal != 0 {
+		return true
+	}
+	if t.flags&TypeFlagsUnionOrIntersection != 0 {
+		return core.Some(t.Types(), c.containsNominalType)
+	}
+	return false
 }
 
 func (c *Checker) bothAreBigIntLike(left *Type, right *Type) bool {
@@ -19285,6 +19313,8 @@ func (c *Checker) typeResolutionHasProperty(r *TypeResolution) bool {
 		return c.valueSymbolLinks.Get(r.target.(*ast.Symbol)).getWriteType() != nil
 	case TypeSystemPropertyNameAliasTarget:
 		return c.aliasSymbolLinks.Get(r.target.(*ast.Symbol)).aliasTarget != nil
+	case TypeSystemPropertyNameNominalBaseType:
+		return r.target.(*Type).AsNominalType().resolvedBaseType != nil
 	}
 	panic("Unhandled case in typeResolutionHasProperty")
 }
@@ -20419,6 +20449,7 @@ func (c *Checker) isNumericComputedName(name *ast.Node) bool {
 func (c *Checker) isValidIndexKeyType(t *Type) bool {
 	return t.flags&(TypeFlagsString|TypeFlagsNumber|TypeFlagsESSymbol) != 0 ||
 		c.isPatternLiteralType(t) ||
+		t.flags&TypeFlagsNominal != 0 && c.isValidIndexKeyType(c.getBaseTypeOfNominalType(t)) ||
 		t.flags&TypeFlagsIntersection != 0 && !c.isGenericType(t) && core.Some(t.Types(), c.isValidIndexKeyType)
 }
 
@@ -22373,6 +22404,10 @@ func (c *Checker) isMappedTypeGenericIndexedAccess(t *Type) bool {
  * type itself.
  */
 func (c *Checker) getApparentType(t *Type) *Type {
+	if t.flags&TypeFlagsNominal != 0 {
+		// Members of a nominal type are the members of its base type.
+		return c.getApparentType(c.getBaseTypeOfNominalType(t))
+	}
 	originalType := t
 	if t.flags&TypeFlagsInstantiable != 0 {
 		t = c.getBaseConstraintOfType(t)
@@ -23248,6 +23283,16 @@ func (c *Checker) instantiateMappedType(t *Type, m *TypeMapper, alias *TypeAlias
 	typeVariable := c.getHomomorphicTypeVariable(t)
 	var instantiateConstituent func(*Type) *Type
 	instantiateConstituent = func(s *Type) *Type {
+		if s.flags&TypeFlagsNominal != 0 {
+			// A homomorphic mapped type over a nominal type maps the underlying type, producing a plain
+			// (structural) result, e.g. Partial<Customer> is { name?: string }. Nominal primitives are kept
+			// as is, just like primitives, e.g. Partial<UserId> is UserId.
+			underlying := c.getUnderlyingTypeOfNominalType(s)
+			if underlying.flags&(TypeFlagsAnyOrUnknown|TypeFlagsInstantiableNonPrimitive|TypeFlagsObject|TypeFlagsUnionOrIntersection) == 0 || c.isErrorType(underlying) {
+				return s
+			}
+			return c.mapType(underlying, instantiateConstituent)
+		}
 		if s.flags&(TypeFlagsAnyOrUnknown|TypeFlagsInstantiableNonPrimitive|TypeFlagsObject|TypeFlagsIntersection) == 0 || s == c.wildcardType || c.isErrorType(s) {
 			return s
 		}
@@ -24589,6 +24634,13 @@ func (c *Checker) getDeclaredTypeOfTypeAlias(symbol *ast.Symbol) *Type {
 			return c.errorType
 		}
 		declaration := core.Find(symbol.Declarations(), ast.IsTypeOrJSTypeAliasDeclaration)
+		if isNominalTypeAliasDeclaration(declaration) {
+			// The base type of a nominal type is resolved lazily (see getBaseTypeOfNominalType), so the
+			// declared type itself never circularly depends on its declaration.
+			c.popTypeResolution()
+			links.declaredType = c.newNominalType(symbol)
+			return links.declaredType
+		}
 		typeNode := declaration.Type()
 		t := c.getTypeFromTypeNode(typeNode)
 		if c.popTypeResolution() {
@@ -25795,6 +25847,78 @@ func (c *Checker) newLiteralType(flags TypeFlags, value any, regularType *Type) 
 		data.regularType = t
 	}
 	return t
+}
+
+func isNominalTypeAliasDeclaration(node *ast.Node) bool {
+	return node.Kind == ast.KindTypeAliasDeclaration && ast.HasSyntacticModifier(node, ast.ModifierFlagsNominal) && node.AsTypeAliasDeclaration().TypeParameters == nil
+}
+
+func (c *Checker) newNominalType(symbol *ast.Symbol) *Type {
+	data := &NominalType{}
+	t := c.newType(TypeFlagsNominal, ObjectFlagsNone, data.AsType(), typeKindNominal)
+	t.symbol = symbol
+	t.alias = &TypeAlias{symbol: symbol}
+	return t
+}
+
+// getBaseTypeOfNominalType returns the type a nominal type was declared on top of, e.g. `string` for
+// `nominal type UserId = string`, or `NodeId` for `nominal type MediaId = NodeId`.
+func (c *Checker) getBaseTypeOfNominalType(t *Type) *Type {
+	n := t.AsNominalType()
+	if n.resolvedBaseType == nil {
+		if !c.pushTypeResolution(t, TypeSystemPropertyNameNominalBaseType) {
+			return c.errorType
+		}
+		declaration := core.Find(t.symbol.Declarations(), ast.IsTypeOrJSTypeAliasDeclaration)
+		base := c.getTypeFromTypeNode(declaration.Type())
+		circular := c.nominalBaseReferencesType(base, t)
+		if !c.popTypeResolution() || circular {
+			c.error(declaration.Name(), diagnostics.Nominal_type_0_circularly_references_itself_as_its_base_type, c.symbolToString(t.symbol))
+			base = c.errorType
+		} else if base.flags&TypeFlagsNever == 0 && c.getStructuralBaseType(base).flags&TypeFlagsNever != 0 {
+			// E.g. `nominal type Broken = Meters & UserId` where Meters is based on number and UserId on string.
+			c.error(declaration.Name(), diagnostics.Nominal_type_0_has_no_possible_values_because_the_base_types_of_its_parent_types_do_not_overlap, c.symbolToString(t.symbol))
+		}
+		if n.resolvedBaseType == nil {
+			n.resolvedBaseType = base
+		}
+	}
+	return n.resolvedBaseType
+}
+
+// getStructuralBaseType replaces every nominal type in t, including those in unions and intersections, by its
+// underlying structural type. E.g. for `HttpPort & WellKnownPort` with bases `80 | 8080` and `80 | 443` it returns `80`.
+func (c *Checker) getStructuralBaseType(t *Type) *Type {
+	switch {
+	case t.flags&TypeFlagsNominal != 0:
+		return c.getStructuralBaseType(c.getBaseTypeOfNominalType(t))
+	case t.flags&TypeFlagsIntersection != 0 && c.containsNominalType(t):
+		return c.getIntersectionType(core.Map(t.Types(), c.getStructuralBaseType))
+	case t.flags&TypeFlagsUnion != 0 && c.containsNominalType(t):
+		return c.getUnionType(core.Map(t.Types(), c.getStructuralBaseType))
+	}
+	return t
+}
+
+// getUnderlyingTypeOfNominalType follows the base types of a nominal type until it reaches a non-nominal type.
+// Non-nominal types are returned unchanged.
+func (c *Checker) getUnderlyingTypeOfNominalType(t *Type) *Type {
+	for t.flags&TypeFlagsNominal != 0 {
+		t = c.getBaseTypeOfNominalType(t)
+	}
+	return t
+}
+
+func (c *Checker) nominalBaseReferencesType(base *Type, t *Type) bool {
+	switch {
+	case base == t:
+		return true
+	case base.flags&TypeFlagsNominal != 0:
+		return c.nominalBaseReferencesType(c.getBaseTypeOfNominalType(base), t)
+	case base.flags&TypeFlagsUnionOrIntersection != 0:
+		return core.Some(base.Types(), func(member *Type) bool { return c.nominalBaseReferencesType(member, t) })
+	}
+	return false
 }
 
 func (c *Checker) newUniqueESSymbolType(symbol *ast.Symbol, name string) *Type {
@@ -30901,6 +31025,10 @@ func (c *Checker) getEffectiveCallArguments(node *ast.Node) []*ast.Node {
 					} else {
 						spreadType = c.checkExpressionCached(arg.Expression())
 					}
+				}
+				if spreadType != nil {
+					// Spreading a value of a nominal tuple type spreads the elements of the underlying tuple.
+					spreadType = c.getUnderlyingTypeOfNominalType(spreadType)
 				}
 				if spreadType != nil && isTupleType(spreadType) {
 					for i, t := range c.getElementTypes(spreadType) {

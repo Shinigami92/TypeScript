@@ -196,6 +196,7 @@
             "OverrideKeyword",
             "OfKeyword",
             "DeferKeyword",
+            "NominalKeyword",
             {
                 "name": "SourceKeyword",
                 "comment": "LastKeyword and LastToken and LastContextualKeyword"
@@ -626,6 +627,7 @@
                 "DefaultKeyword",
                 "ExportKeyword",
                 "InKeyword",
+                "NominalKeyword",
                 "PrivateKeyword",
                 "ProtectedKeyword",
                 "PublicKeyword",
@@ -1230,6 +1232,7 @@
                     "DefaultKeyword": "DefaultKeyword",
                     "ExportKeyword": "ExportKeyword",
                     "InKeyword": "InKeyword",
+                    "NominalKeyword": "NominalKeyword",
                     "PrivateKeyword": "PrivateKeyword",
                     "ProtectedKeyword": "ProtectedKeyword",
                     "PublicKeyword": "PublicKeyword",

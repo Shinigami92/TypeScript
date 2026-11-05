@@ -1,0 +1,45 @@
+//// [tests/cases/compiler/nominalTypesDeclarationEmit.ts] ////
+
+=== nominalTypesDeclarationEmit.ts ===
+export nominal type UserId = string;
+>UserId : Symbol(UserId, Decl(nominalTypesDeclarationEmit.ts, 0, 0))
+
+nominal type Local = number;
+>Local : Symbol(Local, Decl(nominalTypesDeclarationEmit.ts, 0, 36))
+
+export declare nominal type Handle = number;
+>Handle : Symbol(Handle, Decl(nominalTypesDeclarationEmit.ts, 1, 28))
+
+export nominal type MediaId = UserId;
+>MediaId : Symbol(MediaId, Decl(nominalTypesDeclarationEmit.ts, 2, 44))
+>UserId : Symbol(UserId, Decl(nominalTypesDeclarationEmit.ts, 0, 0))
+
+export function make(s: string) {
+>make : Symbol(make, Decl(nominalTypesDeclarationEmit.ts, 3, 37))
+>s : Symbol(s, Decl(nominalTypesDeclarationEmit.ts, 4, 21))
+
+    return s as UserId;
+>s : Symbol(s, Decl(nominalTypesDeclarationEmit.ts, 4, 21))
+>UserId : Symbol(UserId, Decl(nominalTypesDeclarationEmit.ts, 0, 0))
+}
+export const local = 1 as Local;
+>local : Symbol(local, Decl(nominalTypesDeclarationEmit.ts, 7, 12))
+>Local : Symbol(Local, Decl(nominalTypesDeclarationEmit.ts, 0, 36))
+
+export const both = { id: make("x"), media: "m" as MediaId };
+>both : Symbol(both, Decl(nominalTypesDeclarationEmit.ts, 8, 12))
+>id : Symbol(id, Decl(nominalTypesDeclarationEmit.ts, 8, 21))
+>make : Symbol(make, Decl(nominalTypesDeclarationEmit.ts, 3, 37))
+>media : Symbol(media, Decl(nominalTypesDeclarationEmit.ts, 8, 36))
+>MediaId : Symbol(MediaId, Decl(nominalTypesDeclarationEmit.ts, 2, 44))
+
+export function f() {
+>f : Symbol(f, Decl(nominalTypesDeclarationEmit.ts, 8, 61))
+
+    nominal type Inner = string;
+>Inner : Symbol(Inner, Decl(nominalTypesDeclarationEmit.ts, 10, 21))
+
+    return "x" as Inner; // error
+>Inner : Symbol(Inner, Decl(nominalTypesDeclarationEmit.ts, 10, 21))
+}
+

@@ -1,0 +1,121 @@
+//// [tests/cases/compiler/nominalTypesMultipleParents.ts] ////
+
+=== nominalTypesMultipleParents.ts ===
+nominal type Port = number;
+>Port : Port
+
+nominal type HttpPort = Port & (80 | 8080);
+>HttpPort : HttpPort
+
+nominal type WellKnownPort = Port & (80 | 443);
+>WellKnownPort : WellKnownPort
+
+nominal type Both = HttpPort & WellKnownPort;
+>Both : Both
+
+declare const both: Both;
+>both : Both
+
+const hp: HttpPort = both;
+>hp : HttpPort
+>both : Both
+
+const wk: WellKnownPort = both;
+>wk : WellKnownPort
+>both : Both
+
+const port: Port = both;
+>port : Port
+>both : Both
+
+const lit: 80 = both;
+>lit : 80
+>both : Both
+
+const num: number = both;
+>num : number
+>both : Both
+
+declare const http: HttpPort;
+>http : HttpPort
+
+const notBoth: Both = http; // error
+>notBoth : Both
+>http : HttpPort
+
+const http80: 80 | 8080 = http;
+>http80 : 80 | 8080
+>http : HttpPort
+
+const asBoth = http as Both;
+>asBoth : Both
+>http as Both : Both
+>http : HttpPort
+
+type AnyKnownPort = HttpPort | WellKnownPort;
+>AnyKnownPort : AnyKnownPort
+
+declare const anyKnown: AnyKnownPort;
+>anyKnown : AnyKnownPort
+
+const anyKnownLit: 80 | 443 | 8080 = anyKnown;
+>anyKnownLit : 80 | 443 | 8080
+>anyKnown : AnyKnownPort
+
+nominal type Trimmed = string;
+>Trimmed : Trimmed
+
+nominal type Lowercased = string;
+>Lowercased : Lowercased
+
+nominal type Normalized = Trimmed & Lowercased;
+>Normalized : Normalized
+
+declare const normalized: Normalized;
+>normalized : Normalized
+
+const trimmed: Trimmed = normalized;
+>trimmed : Trimmed
+>normalized : Normalized
+
+const lowercased: Lowercased = normalized;
+>lowercased : Lowercased
+>normalized : Normalized
+
+const plain: string = normalized;
+>plain : string
+>normalized : Normalized
+
+nominal type Meters = number;
+>Meters : Meters
+
+nominal type UserId = string;
+>UserId : UserId
+
+nominal type Broken = Meters & UserId; // error
+>Broken : Broken
+
+nominal type Self = Self; // error
+>Self : Self
+
+nominal type A = B; // error
+>A : A
+
+nominal type B = A; // error
+>B : B
+
+nominal type Tree = { children: Tree[] };
+>Tree : Tree
+>children : Tree[]
+
+declare const tree: Tree;
+>tree : Tree
+
+const firstChild: Tree = tree.children[0];
+>firstChild : Tree
+>tree.children[0] : Tree
+>tree.children : Tree[]
+>tree : Tree
+>children : Tree[]
+>0 : 0
+

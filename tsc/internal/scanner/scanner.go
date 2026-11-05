@@ -89,6 +89,7 @@ var textToKeyword = map[string]ast.Kind{
 	"namespace":   ast.KindNamespaceKeyword,
 	"never":       ast.KindNeverKeyword,
 	"new":         ast.KindNewKeyword,
+	"nominal":     ast.KindNominalKeyword,
 	"null":        ast.KindNullKeyword,
 	"number":      ast.KindNumberKeyword,
 	"object":      ast.KindObjectKeyword,
